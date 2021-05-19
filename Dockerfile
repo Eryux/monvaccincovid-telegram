@@ -26,4 +26,4 @@ RUN set -ex \
 ENTRYPOINT ["python3"]
 
 # Run application
-CMD ["./bot.py"]
+CMD ["./app.py"]

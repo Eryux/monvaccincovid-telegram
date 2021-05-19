@@ -3,3 +3,4 @@ python-telegram-bot==13.5
 mysqlclient==2.0.3
 cloudscraper==1.2.58
 python-dateutil==2.8.1
+peewee==3.14.4
