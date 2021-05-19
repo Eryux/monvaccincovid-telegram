@@ -1,0 +1,6 @@
+.env
+*/bin
+*/obj
+.vscode
+__pycache__
+settings.py
