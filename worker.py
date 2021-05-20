@@ -67,37 +67,42 @@ class Worker(threading.Thread):
                     center.last_fetch = now
                     center.save()
 
-                    if 'total' in availabilities and availabilities['total'] > 0:
-                        # Calculate response hash
-                        availabilities_hash = Worker.get_str_hash(json.dumps(availabilities))
+                    # Calculate response hash
+                    availabilities_hash = Worker.get_str_hash(json.dumps(availabilities))
 
-                        # Build message
-                        message = "💉 {} créneau(x) de vaccination disponible(s) à {}.\n\n".format(availabilities['total'], center.name)
+                    if center.update_hash != availabilities_hash:
+                        # Update hash
+                        center.update_hash = availabilities_hash
+                        center.save()
 
-                        try:
-                            slots = DoctolibUtils.slots_from_availabilities(availabilities)
-                            for slot_day in slots:
-                                if len(slots[slot_day]) == 0:
-                                    continue
-                                message += "Le {} : {}\n".format(dateutil.parser.parse(slot_day).strftime("%d/%m"), ', '.join([x.strftime("%H:%M") for x in slots[slot_day]]))
-                        except:
-                            pass
-                        
-                        message += "\nLien : " + DoctolibUtils.create_center_link(center.doctolib_url, center.doctolib_practice)
+                        if 'total' in availabilities and availabilities['total'] > 0:
+                            # Build message
+                            message = "💉 {} créneau(x) de vaccination disponible(s) à {}.\n\n".format(availabilities['total'], center.name)
 
-                        # Update stats
-                        stat_slots.param_value = str(int(stat_slots.param_value) + availabilities['total'])
-                        stat_slots.save()
+                            try:
+                                slots = DoctolibUtils.slots_from_availabilities(availabilities)
+                                for slot_day in slots:
+                                    if len(slots[slot_day]) == 0:
+                                        continue
+                                    message += "Le {} : {}\n".format(dateutil.parser.parse(slot_day).strftime("%d/%m"), ', '.join([x.strftime("%H:%M") for x in slots[slot_day]]))
+                            except:
+                                pass
+                            
+                            message += "\nLien : " + DoctolibUtils.create_center_link(center.doctolib_url, center.doctolib_practice)
 
-                        stat_alerts.param_value = str(int(stat_alerts.param_value) + len(channels))
-                        stat_alerts.save()
+                            # Update stats
+                            stat_slots.param_value = str(int(stat_slots.param_value) + availabilities['total'])
+                            stat_slots.save()
 
-                        # Send message
-                        for channel in channels:
-                            if channel.update_hash != availabilities_hash:
+                            stat_alerts.param_value = str(int(stat_alerts.param_value) + len(channels))
+                            stat_alerts.save()
+
+                            # Update channel and send message
+                            for channel in channels:
                                 channel.update_hash = availabilities_hash
                                 channel.last_update = now
                                 channel.save()
+
                                 self.bot.send_alert_message(int(channel.channel), message, center.id)
                 else:
                     print("faked")

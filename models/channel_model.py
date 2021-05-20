@@ -13,8 +13,6 @@ class ChannelModel(BaseModel):
 
     last_update = DateTimeField(default=datetime.now())
 
-    update_hash = CharField(max_length=64, default="")
-
     class Meta:
         table_name = "vc_channel"
         primary_key = CompositeKey('channel', 'center')

@@ -1,6 +1,7 @@
 import settings
 import json
 import re
+import time
 
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.error import Unauthorized
@@ -259,9 +260,14 @@ class TelegramClient:
 
 
     def send_alert_message(self, channel_id, message, center_id):
-        chat = self.updater.bot.get_chat(channel_id)
-        keyboard = [[InlineKeyboardButton("Voir la localisation", callback_data='center/location/{}'.format(center_id))]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        self.updater.bot.send_message(chat.id, message, reply_markup=reply_markup, disable_web_page_preview=False)
+        try:
+            chat = self.updater.bot.get_chat(channel_id)
+            keyboard = [[InlineKeyboardButton("Voir la localisation", callback_data='center/location/{}'.format(center_id))]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            self.updater.bot.send_message(chat.id, message, reply_markup=reply_markup, disable_web_page_preview=False)
+        except Unauthorized:
+            print("Unable to send message for {} : reason Unauthorized".format(channel_id))
+        except:
+            pass
 
 # End of file bot.py

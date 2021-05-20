@@ -25,6 +25,8 @@ class CenterModel(BaseModel):
 
     cache_expire = DateTimeField(default=datetime.now())
 
+    update_hash = CharField(max_length=64, default="")
+
     city = CharField(max_length=254, default="")
 
     zip_code = FixedCharField(max_length=5, default="")
